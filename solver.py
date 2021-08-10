@@ -1,12 +1,14 @@
-board = [[0,0,8,0,0,0,2,0,0],
-        [0,0,0,0,8,4,0,9,0],
-        [0,0,6,3,2,0,0,1,0],
-        [0,9,7,0,0,0,0,8,0],
-        [8,0,0,9,0,3,0,0,3],
-        [0,1,0,0,0,0,0,9,5],
-        [0,7,0,0,4,5,8,0,0],
-        [0,3,0,7,1,0,0,0,0],
-        [0,0,8,0,0,0,0,4,0]]
+board = [
+    [7,8,0,4,0,0,1,2,0],
+    [6,0,0,0,7,5,0,0,9],
+    [0,0,0,6,0,1,0,7,8],
+    [0,0,7,0,4,0,2,6,0],
+    [0,0,1,0,5,0,9,3,0],
+    [9,0,4,0,6,0,0,0,5],
+    [0,7,0,3,0,0,0,1,2],
+    [1,2,0,0,0,7,4,0,0],
+    [0,4,9,2,0,6,0,0,7]
+]
 
 # pretty prints a board on the console
 def print_board(bo):
@@ -27,7 +29,9 @@ def find_first_empty(bo):
                 for j in range(len(bo)):
                         if bo[i][j] == 0:
                                 return (i,j)
+        return None
 
+# checks if digit e at board coordinates i,j is valid given the rules of the game
 def valid_entry(e,i,j,bo):
         row = bo[i]
         col = [row[j] for row in bo]
@@ -42,20 +46,44 @@ def valid_entry(e,i,j,bo):
         else:
                 return False
 
+# extrapolates the 3x3 subgrid containing the given coordinate on the board
 def get_square(i,j,bo):
-        start_col, end_col = get_square_range(i,bo)
-        start_row, end_row = get_square_range(j,bo)
+        start_col, end_col = get_square_range(j,bo)
+        start_row, end_row = get_square_range(i,bo)
 
         rows_from_board = bo[start_row:end_row+1]
         square = [row[start_col:end_col+1] for row in rows_from_board]
         return(square)
 
-
+# helper function for get_square, finds the index range for the rows and columns of the square in question
 def get_square_range(x,bo):
         start_index = int(x/3) * 3
         end_index = start_index + 2
-        print(start_index,end_index)
         return (start_index, end_index)
 
+# implementation of backtracking algorithm using previously defined helper functions
+def solve_board(bo):
+        empty = find_first_empty(bo)
+        if(not empty):
+                return True
+        else:
+                row, col = empty
+
+        for i in range(1,10):
+                if(valid_entry(i, row, col, bo)):
+                        bo[row][col] = i
+
+                        if(solve_board(bo)):
+                                return True
+                        else:        
+                                bo[row][col] = 0
+        
+        return False
+
+print("Original puzzle:")
 print_board(board)
-print(valid_entry(8,4,0,board))
+if(solve_board(board)):
+        print("Solution:")
+        print_board(board)
+else:
+        print("No solution to this puzzle!")
